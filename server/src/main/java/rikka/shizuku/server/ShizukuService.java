@@ -1,5 +1,6 @@
 package rikka.shizuku.server;
 
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static rikka.shizuku.ShizukuApiConstants.ATTACH_APPLICATION_API_VERSION;
 import static rikka.shizuku.ShizukuApiConstants.ATTACH_APPLICATION_PACKAGE_NAME;
 import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_PERMISSION_GRANTED;
@@ -236,6 +237,13 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         if (!isManager) {
             reply.putBoolean(BIND_APPLICATION_PERMISSION_GRANTED, Objects.requireNonNull(clientRecord).allowed);
             reply.putBoolean(BIND_APPLICATION_SHOULD_SHOW_REQUEST_PERMISSION_RATIONALE, false);
+        } else {
+            try {
+                PermissionManagerApis.grantRuntimePermission(MANAGER_APPLICATION_ID,
+                        WRITE_SECURE_SETTINGS, UserHandleCompat.getUserId(callingUid));
+            } catch (RemoteException e) {
+                LOGGER.w(e, "grant WRITE_SECURE_SETTINGS");
+            }
         }
         try {
             application.bindApplication(reply);
@@ -316,6 +324,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
                     continue;
                 }
 
+                int deviceId = 0;//Context.DEVICE_ID_DEFAULT
                 if (allowed) {
                     PermissionManagerApis.grantRuntimePermission(packageName, PERMISSION, userId);
                 } else {
@@ -325,7 +334,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         }
     }
 
-    private int getFlagsForUidInternal(int uid, int mask, boolean allowRuntimePermission) {
+    private int  getFlagsForUidInternal(int uid, int mask, boolean allowRuntimePermission) {
         ShizukuConfig.PackageEntry entry = configManager.find(uid);
         if (entry != null) {
             return entry.flags & mask;
@@ -390,6 +399,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
                     continue;
                 }
 
+                int deviceId = 0;//Context.DEVICE_ID_DEFAULT
                 if (allowed) {
                     PermissionManagerApis.grantRuntimePermission(packageName, PERMISSION, userId);
                 } else {

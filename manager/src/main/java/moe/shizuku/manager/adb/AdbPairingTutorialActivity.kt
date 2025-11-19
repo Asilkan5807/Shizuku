@@ -49,6 +49,7 @@ class AdbPairingTutorialActivity : AppBarActivity() {
             developerOptions.setOnClickListener {
                 val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                intent.putExtra(":settings:fragment_args_key", "toggle_adb_wireless")
                 try {
                     context.startActivity(intent)
                 } catch (e: ActivityNotFoundException) {
@@ -118,9 +119,5 @@ class AdbPairingTutorialActivity : AppBarActivity() {
                 startService(intent)
             }
         }
-
-        val mode = getSystemService(AppOpsManager::class.java)
-            .noteOpNoThrow("android:start_foreground", android.os.Process.myUid(), packageName, null, null)
-
     }
 }
